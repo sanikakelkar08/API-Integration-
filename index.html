@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Task 01: Weather App</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+       <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter City Name" spellcheck="false">
+           <button><img src="search.png"></button>
+        </div>
+        <div class="error">
+            <p>Invalid city name</p>
+        </div>
+        <div class="weather">
+            <img src="rain.png" class="weather-icon">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">Pune</h2>
+            <div class="details">
+                <div class="col1">
+                    <img src="humidity.png">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col1">
+                    <img src="wind.png">
+                    <div>
+                        <p class="wind">50km/hr</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+       </div>
+       <script>
+        const apiKey = "YOUR_API_KEY";
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+        const searchBox = document.querySelector(".search input");
+        const searchBtn = document.querySelector(".search button");
+        const weatherIcon = document.querySelector(".weather-icon");
+
+        async function checkWeather(city) {
+            // FIX 1: Use backticks (`) for template literal, not single quotes
+            const response = await fetch(`${apiUrl}${city}&appid=${apiKey}`);
+
+            // FIX 2: Get the data FIRST before using it
+            const data = await response.json();
+
+            // FIX 3: Check for 404 error properly
+            if(response.status == 404){
+                document.querySelector(".error").style.display = "block";
+                document.querySelector(".weather").style.display = "none";
+                return; // Exit function early
+            }
+
+            // FIX 4: Hide error message if successful
+            document.querySelector(".error").style.display = "none";
+
+            console.log(data);
+            
+            // Update weather information
+            document.querySelector(".city").innerHTML = data.name;
+            document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+            document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+            document.querySelector(".wind").innerHTML = data.wind.speed + " km/hr";
+
+            // FIX 5: Weather icon logic (only once, not duplicated)
+            if(data.weather[0].main == "Clouds"){
+                weatherIcon.src = "clouds.png";
+            }
+            else if(data.weather[0].main == "Clear"){
+                weatherIcon.src = "clear.png";
+            }
+            else if(data.weather[0].main == "Rain"){
+                weatherIcon.src = "rain.png";
+            }
+            else if(data.weather[0].main == "Drizzle"){
+                weatherIcon.src = "drizzle.png";
+            }
+            else if(data.weather[0].main == "Mist"){
+                weatherIcon.src = "mist.png";
+            }
+
+            // FIX 6: Show weather display (was hidden at end of original code)
+            document.querySelector(".weather").style.display = "block";
+        }
+
+        // FIX 7: Added missing closing bracket
+        searchBtn.addEventListener("click", () => {
+            if (searchBox.value.trim() == ""){
+                alert("Please enter a city name");
+                return;
+            }
+            checkWeather(searchBox.value.trim());
+        });
+
+        // BONUS: Allow Enter key to search
+        searchBox.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                if (searchBox.value.trim() == ""){
+                    alert("Please enter a city name");
+                    return;
+                }
+                checkWeather(searchBox.value.trim());
+            }
+        });
+       </script>
+    </body>
+</html>
